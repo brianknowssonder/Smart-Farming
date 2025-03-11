@@ -21,7 +21,7 @@ def signup():
     region = request.form["region"]
 
     # create db connection
-    connection = pymysql.connect(host="localhost", user="root", password="", database="n")
+    connection = pymysql.connect(host="localhost", user="root", password="", database="")
 
     # initialize db connection using .cursor()
     cursor = connection.cursor()
