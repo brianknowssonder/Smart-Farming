@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Farming - Weather Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Full-page background image */
+        body {
+            height: 100vh;
+            background-size: cover;
+            background-position: center center;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            background-color: darkturquoise;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.5); /* Dark background for better text visibility */
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h2, h3, p {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-control {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Weather Dashboard</h2>
+        
+        <!-- Search Bar for City -->
+        <div class="form-group">
+            <label for="city">Enter City</label>
+            <input type="text" class="form-control" id="city" placeholder="Enter city name" required>
+        </div>
+        
+        <button id="getWeatherBtn" class="btn btn-primary">Get Weather</button>
+        
+        <!-- Weather Information Display -->
+        <div id="weatherInfo" class="mt-5">
+            <h3>Weather in <span id="cityName"></span></h3>
+            <p><strong>Temperature:</strong> <span id="temp"></span> °C</p>
+            <p><strong>Feels Like:</strong> <span id="feelsLike"></span> °C</p>
+            <p><strong>Humidity:</strong> <span id="humidity"></span>%</p>
+            <p><strong>Wind Speed:</strong> <span id="windSpeed"></span> m/s</p>
+            <p><strong>Description:</strong> <span id="description"></span></p>
+            <p><strong>Sunrise:</strong> <span id="sunrise"></span></p>
+            <p><strong>Sunset:</strong> <span id="sunset"></span></p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        // Weather API Key and Base URL
+        const API_KEY = "da332b532324f8d565bafa71121cbd87";
+        const BASE_URL = "http://api.openweathermap.org/data/2.5/weather?";
+
+        // Convert timestamp to time format
+        function convertToTime(timestamp) {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleTimeString();
+        }
+
+        // Set background image based on weather description
+        function setBackground(description) {
+            let backgroundImage;
+            if (description.includes("clear")) {
+                backgroundImage = "url('https://www.istockphoto.com/photo/young-woman-sitting-on-edge-looks-out-at-view-gm1065043970-284792252?utm_source=pixabay&utm_medium=affiliate&utm_campaign=sponsored_image&utm_content=srp_topbanner_media&utm_term=clear+sky+images')";
+            } else if (description.includes("broken clouds")) {
+                backgroundImage = "url('https://www.istockphoto.com/photo/clouds-on-sky-gm184103864-16699674?utm_source=pixabay&utm_medium=affiliate&utm_campaign=sponsored_image&utm_content=srp_topbanner_media&utm_term=clouds+images')";
+            } else if (description.includes("rain")) {
+                backgroundImage = "url('https://www.istockphoto.com/photo/transparent-umbrella-under-rain-against-water-drops-splash-background-rainy-weather-gm1257951336-368822698?utm_source=pixabay&utm_medium=affiliate&utm_campaign=sponsored_image&utm_content=srp_topbanner_media&utm_term=rainy+images')";
+            } else if (description.includes("snow")) {
+                backgroundImage = "url('https://www.istockphoto.com/photo/skier-skis-down-slope-through-fresh-powder-snow-gm2165025120-585254961?utm_source=pixabay&utm_medium=affiliate&utm_campaign=sponsored_image&utm_content=srp_topbanner_media&utm_term=snowy+sky+images')";
+            } else {
+                backgroundImage = "url('https://media.istockphoto.com/id/1365264688/vector/weather-forecast-meteorology-widget-app-interface.jpg?s=612x612&w=0&k=20&c=OSQHTnpLnK_p5jpyJ3i1hU7CWPSDUV_9JV69WqANgYk=')";
+            }
+            $("body").css("background-image", backgroundImage);
+        }
+
+        // Fetch and display weather data
+        function getWeather(city) {
+            const url = `${BASE_URL}q=${city}&appid=${API_KEY}&units=metric`;
+
+            $.get(url, function(data) {
+                // Display weather info
+                $("#cityName").text(data.name);
+                $("#temp").text(data.main.temp);
+                $("#feelsLike").text(data.main.feels_like);
+                $("#humidity").text(data.main.humidity);
+                $("#windSpeed").text(data.wind.speed);
+                $("#description").text(data.weather[0].description);
+                $("#sunrise").text(convertToTime(data.sys.sunrise + data.timezone));
+                $("#sunset").text(convertToTime(data.sys.sunset + data.timezone));
+                
+                // Set background based on weather description
+                setBackground(data.weather[0].description);
+
+                $("#weatherInfo").show();
+            }).fail(function() {
+                alert("Failed to fetch weather data. Please try again.");
+            });
+        }
+
+        // Button click event for fetching weather
+        $("#getWeatherBtn").click(function() {
+            const city = $("#city").val();
+            if (city) {
+                getWeather(city);
+            } else {
+                alert("Please enter a city.");
+            }
+        });
+    </script>
+</body>
+</html>

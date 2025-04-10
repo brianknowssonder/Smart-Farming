@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Farming - Crop Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Crop Management</h2>
+        
+        <!-- Crop Entry Form -->
+        <form id="addCropForm" action="/api/add_crops" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="crop_name">Crop Name</label>
+                <input type="text" class="form-control" id="crop_name" name="crop_name" required>
+            </div>
+            <div class="form-group">
+                <label for="scientific_name">Scientific Name</label>
+                <input type="text" class="form-control" id="scientific_name" name="scientific_name" required>
+            </div>
+            <div class="form-group">
+                <label for="soil_type">Soil Type</label>
+                <input type="text" class="form-control" id="soil_type" name="soil_type" required>
+            </div>
+            <div class="form-group">
+                <label for="pests_diseases">Pests/Diseases</label>
+                <input type="text" class="form-control" id="pests_diseases" name="pests_diseases" required>
+            </div>
+            <div class="form-group">
+                <label for="weather_conditions">Weather Conditions</label>
+                <input type="text" class="form-control" id="weather_conditions" name="weather_conditions" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Crop</button>
+        </form>
+        
+        <h3 class="mt-5">List of Crops</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Crop Name</th>
+                    <th>Scientific Name</th>
+                    <th>Soil Type</th>
+                    <th>Pests/Diseases</th>
+                    <th>Weather Conditions</th>
+                </tr>
+                
+            </thead>
+            <tbody id="cropsList"></tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        // Fetch and display crops from backend
+        function loadCrops() {
+            $.get("/api/get_crops", function(data) {
+                let cropsList = $("#cropsList");
+                cropsList.empty(); // Clear the table before updating
+                data.forEach(crop => {
+                    cropsList.append(`<tr>
+                        <td>${crop.crop_name}</td>
+                        <td>${crop.scientific_name}</td>
+                        <td>${crop.soil_type}</td>
+                        <td>${crop.pests_diseases}</td>
+                        <td>${crop.weather_conditions}</td>
+                    </tr>`);
+                });
+            }).fail(function() {
+                alert("Failed to load crops.");
+            });
+        }
+
+        // On page load, fetch and display crops
+        $(document).ready(function() {
+            loadCrops(); // Load crops immediately on page load
+
+            // Add Crop Form submission handling
+            $("#addCropForm").submit(function(event) {
+                event.preventDefault();
+                let formData = new FormData(this);
+                $.ajax({
+                    url: "/api/add_crops",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        loadCrops(); // Reload crops after adding a new one
+                        alert(response.message);
+                    },
+                    error: function(response) {
+                        alert("Error adding crop: " + response.responseJSON.error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
