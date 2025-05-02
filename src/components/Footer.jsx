@@ -17,7 +17,7 @@ const Footer = () => {
                     <div className="col-md-3 mb-4">
                         <h5>Quick Links</h5>
                         <ul className="list-unstyled">
-                            <li><a href="/dashboard" className="text-white">Dashboard</a></li>
+                            <li><a href="/" className="text-white">Dashboard</a></li>
                             <li><a href="/weather" className="text-white">Weather</a></li>
                             <li><a href="/sensors" className="text-white">Sensors</a></li>
                             <li><a href="/contact" className="text-white">Contact</a></li>
@@ -55,7 +55,7 @@ const Footer = () => {
 
                 <hr className="bg-white" />
                 <div className="text-center">
-                    <p className="mb-0">&copy; 2025 SmartFarm by Brian.M.Mwangi All Rights Reserved.</p>
+                    <p className="mb-0">&copy; 2025 SmartFarm by Carol.M.Mwangi All Rights Reserved.</p>
                 </div>
             </div>
         </footer>

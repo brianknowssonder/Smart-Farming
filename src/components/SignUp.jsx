@@ -64,7 +64,7 @@ const SignUp = () => {
                     <input onChange={(e) => setEmail(e.target.value)} value={email} type="email" required placeholder="Enter Your Email Here: " className="shadow form-control" /> <br />
                     <input onChange={(e) => setPhone(e.target.value)} value={phone} type="tel" required placeholder="Enter Your Telephone Number Here: " className="shadow form-control" /> <br />
                     <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" required placeholder="Enter Your Password Here:" className="shadow form-control" /> <br />
-                    <button className="btn btn-outline-warning text-warning " type="submit">Sign Up</button> <br />
+                    <button className="btn btn-outline-warning text-dark " type="submit">Sign Up</button> <br />
                     
                 </form>
                 <br />

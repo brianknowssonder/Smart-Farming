@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import {  FaLeaf } from 'react-icons/fa';
+import { FaLeaf } from "react-icons/fa";
 import {
   LineChart,
   Line,
@@ -11,8 +11,9 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import PulseLoader from "react-spinners/PulseLoader"; // ✅ Import PulseLoader
 
-const API_KEY = "da332b532324f8d565bafa71121cbd87"; // Replace with your actual API key
+const API_KEY = "da332b532324f8d565bafa71121cbd87";
 
 const DashboardComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,30 +27,63 @@ const DashboardComponent = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-// Example logout function
-const handleLogout = () => {
-  setIsLoggedIn(false);
-  // Optionally: clear token/session here
-};
+  const [isCropLoading, setIsCropLoading] = useState(false);
+  const [isWeatherLoading, setIsWeatherLoading] = useState(false);
 
-<Navbar isLoggedIn={isLoggedIn} handleLogout={handleLogout} />
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    setSearchTerm("");
+    setCropData(null);
+    setLocation("");
+    setWeatherData(null);
+    setWeatherError("");
+    setForecastData([]);
+  };
 
   const fetchCropDetails = async () => {
-    try {
+    if (!searchTerm.trim()) {
+      setError("Please enter a crop name.");
+      setCropData(null);
+      return;
+    }
 
-      const response = await fetch(`/api/v1/crops/?filter=${searchTerm}`);
-      const data = await response.json();
-      if (data && data.data.length > 0) {
-        setCropData(data.data[0].attributes);
+    setIsCropLoading(true);
+
+    try {
+      const response = await fetch(`https://openfarm.cc/api/v1/crops/?filter=${searchTerm}`);
+      const text = await response.text();
+
+      if (text.includes("<!DOCTYPE html>")) {
+        throw new Error("Received HTML, possibly an error page.");
+      }
+
+      const data = JSON.parse(text);
+      if (data && data.data && data.data.length > 0) {
+        const crop = data.data[0].attributes;
+        setCropData({
+          name: crop.name,
+          description: crop.description,
+          main_image_path: crop.main_image_path,
+        });
         setError("");
       } else {
         setCropData(null);
-        setError("No crop found");
+        setError("No crop found with that name.");
       }
     } catch (err) {
-      setError("Error fetching crop data.");
       setCropData(null);
+      setError("Failed to fetch crop data. Please try again later.");
+      console.error(err.message);
+    } finally {
+      setIsCropLoading(false);
     }
   };
 
@@ -78,6 +112,8 @@ const handleLogout = () => {
   };
 
   const fetchWeather = async () => {
+    setIsWeatherLoading(true);
+
     try {
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_KEY}&units=metric`
@@ -86,7 +122,7 @@ const handleLogout = () => {
       if (data.cod === 200) {
         setWeatherData(data);
         setWeatherError("");
-        fetchWeatherForecast();
+        await fetchWeatherForecast();
       } else {
         setWeatherError("City not found");
         setWeatherData(null);
@@ -96,12 +132,14 @@ const handleLogout = () => {
       setWeatherError("Error fetching weather data");
       setWeatherData(null);
       setForecastData([]);
+    } finally {
+      setIsWeatherLoading(false);
     }
   };
 
   return (
     <div className="container-fluid p-3 bg-light">
-      <Navbar />
+      <Navbar isLoggedIn={isLoggedIn} handleLogout={handleLogout} />
 
       <div className="text-center mb-4">
         <h1 className="bg-success text-white p-2 rounded">Farmer's Dashboard</h1>
@@ -119,8 +157,19 @@ const handleLogout = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button className="btn btn-success" onClick={fetchCropDetails}>
-              Search Crop
+            <button
+              className="btn btn-success d-flex align-items-center justify-content-center gap-2"
+              onClick={fetchCropDetails}
+              disabled={isCropLoading}
+            >
+              {isCropLoading ? (
+                <>
+                  <PulseLoader size={6} color="#ffffff" />
+                  Loading...
+                </>
+              ) : (
+                "Search Crop"
+              )}
             </button>
           </div>
         </div>
@@ -158,8 +207,19 @@ const handleLogout = () => {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
-            <button className="btn btn-primary" onClick={fetchWeather}>
-              Get Weather
+            <button
+              className="btn btn-primary d-flex align-items-center justify-content-center gap-2"
+              onClick={fetchWeather}
+              disabled={isWeatherLoading}
+            >
+              {isWeatherLoading ? (
+                <>
+                  <PulseLoader size={6} color="#ffffff" />
+                  Loading...
+                </>
+              ) : (
+                "Get Weather"
+              )}
             </button>
           </div>
         </div>
@@ -174,7 +234,7 @@ const handleLogout = () => {
                 <p className="card-text">
                   {weatherData.weather[0].description} <br />
                   Temperature: {weatherData.main.temp}°C <br />
-                  Humidity: {weatherData.main.humidity}%
+                  Humidity: {weatherData.main.humidity}% <br />
                 </p>
                 <img
                   src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
@@ -212,9 +272,15 @@ const handleLogout = () => {
         <div className="col-md-12">
           <h4 className="mb-3">🌿 Farming Tips</h4>
           <ul className="list-group">
-            <li className="list-group-item"><FaLeaf /> Water early in the morning to reduce evaporation.</li>
-            <li className="list-group-item"><FaLeaf /> Keep checking for pests during warm, dry spells.</li>
-            <li className="list-group-item"><FaLeaf /> Use crop rotation to improve soil health.</li>
+            <li className="list-group-item">
+              <FaLeaf /> Water early in the morning to reduce evaporation.
+            </li>
+            <li className="list-group-item">
+              <FaLeaf /> Keep checking for pests during warm, dry spells.
+            </li>
+            <li className="list-group-item">
+              <FaLeaf /> Use crop rotation to improve soil health.
+            </li>
           </ul>
         </div>
       </div>
