@@ -104,8 +104,14 @@ body {
   border: 1px solid #c3e6cb;
   color: #155724;
 }
-/* Add this to your CSS file or inside a <style> tag */
-input::placeholder {
-  color: #28a745; /* Success green color */
+#dashboard-background {
+  background-image: url('/public/images/farmergirl.webp');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  min-height: 100vh; /* Ensures full viewport height */
+}
+#nav{
+  height: 80px;
 }
 

@@ -55,7 +55,7 @@ const Footer = () => {
 
                 <hr className="bg-white" />
                 <div className="text-center">
-                    <p className="mb-0">&copy; 2025 SmartFarm by Carol.M.Mwangi All Rights Reserved.</p>
+                    <p className="mb-0">&copy; 2025 SmartFarm by Brian.M.Mwangi All Rights Reserved.</p>
                 </div>
             </div>
         </footer>

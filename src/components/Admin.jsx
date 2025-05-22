@@ -127,9 +127,7 @@ const AdminDashboard = () => {
           <FaLeaf className="me-2 text-warning" style={{ fontSize: "2rem" }} />
           SmartFarm Admin Dashboard
         </h1>
-        <p className="lead text-secondary">
-          View and manage users and their balances in one powerful dashboard.
-        </p>
+        
       </div>
 
       <div className="container bg-black p-4 rounded shadow-lg border border-success">
@@ -160,7 +158,7 @@ const AdminDashboard = () => {
                   <tr>
                     <th>Rank</th>
                     <th>Username</th>
-                    <th>Balance ($)</th>
+                    <th>Balance (Ksh)</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -178,7 +176,7 @@ const AdminDashboard = () => {
                             className="form-control w-50 mx-auto"
                           />
                         ) : (
-                          `$${user.balance.toFixed(2)}`
+                          `Ksh ${user.balance.toFixed(2)}`
                         )}
                       </td>
                       <td>

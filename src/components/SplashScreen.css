@@ -1,0 +1,78 @@
+/* Full-screen dark background */
+.splash-screen {
+  background: #000; /* pure dark */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+/* Centered content box with subtle border */
+.splash-box {
+  background: #111; /* slightly lighter dark */
+  border: 2px solid #28a745; /* success green */
+  border-radius: 12px;
+  padding: 2.5rem 3rem;
+  text-align: center;
+  width: 320px;
+  box-shadow: 0 0 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Rotating leaf icon */
+.logo-container {
+  animation: rotate 3s linear infinite;
+  margin-bottom: 1rem;
+}
+.logo-icon {
+  font-size: 3rem;
+  color: #ffc107; /* warning yellow */
+}
+
+/* Title styling */
+.splash-title {
+  font-size: 2.5rem;
+  color: #28a745; /* Bootstrap success green */
+  margin-bottom: 0.5rem;
+}
+
+/* Tagline with typewriter cursor */
+.splash-tagline {
+  height: 1.5rem; /* reserve space */
+  margin-bottom: 1.25rem;
+  font-style: italic;
+}
+.cursor {
+  animation: blink 1s step-end infinite;
+}
+
+/* Progress bar container */
+.progress-bar {
+  background: #222;
+  border: 1px solid #28a745;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 8px;
+  margin: 0 auto 0.75rem;
+  width: 100%;
+}
+/* Animated fill */
+.progress-fill {
+  height: 100%;
+  transition: width 0.1s ease-out;
+}
+
+/* Loading text */
+.splash-loading {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Animations */
+@keyframes rotate {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}

@@ -6,7 +6,7 @@ const Navbar = ({ isLoggedIn, handleLogout }) => {
   const isAdmin = user?.username?.toLowerCase() === "brian" || user?.username?.toLowerCase() === "carol";
 
   return (
-    <section id="nav" className="row">
+    <section id="nav" className="row ">
       <div className="col-md-12">
         <div className="navbar navbar-expand-md navbar-light">
           <Link to="/" className="navbar-brand">
@@ -30,6 +30,7 @@ const Navbar = ({ isLoggedIn, handleLogout }) => {
             </div>
 
             <div className="navbar-nav ms-auto">
+              <Link to="/contact" className="nav-link text-success">Contact Us</Link>
               {isLoggedIn ? (
                 <>
                   <Link to="/bank" className="nav-link text-success">Smart Bank</Link>

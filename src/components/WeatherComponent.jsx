@@ -1,115 +1,194 @@
-import { useState } from "react";
+// WeatherComponent.jsx
+import React, { useState } from "react";
+import { Line } from "react-chartjs-2";
+import ChartJS from "chart.js/auto";
 
-const WeatherComponent = () => {
+export const WeatherComponent = () => {
   const API_KEY = "da332b532324f8d565bafa71121cbd87";
-
   const [city, setCity] = useState("");
   const [weatherData, setWeatherData] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState("");
+  const [forecastData, setForecastData] = useState([]);
+  const [showTrend, setShowTrend] = useState(false);
 
-  const convertToTime = (timestamp) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleTimeString();
+  const convertToTime = (ts) => new Date(ts * 1000).toLocaleTimeString();
+
+  // choose background based on description
+  const setBackground = (desc) => {
+    let url = "";
+    if (desc.includes("clear")) url = "url('clear.jpg')";
+    else if (desc.includes("cloud")) url = "url('cloud.jpg')";
+    else if (desc.includes("rain")) url = "url('rain.jpg')";
+    else if (desc.includes("snow")) url = "url('snow.jpg')";
+    else url = "url('default.jpg')";
+    setBackgroundImage(url);
   };
 
-  const setBackground = (description) => {
-    let backgroundUrl = "";
-
-    if (description.includes("clear")) {
-      backgroundUrl = "url('https://www.istockphoto.com/photo/young-woman-sitting-on-edge-looks-out-at-view-gm1065043970-284792252')";
-    } else if (description.includes("cloud")) {
-      backgroundUrl = "url('https://www.istockphoto.com/photo/clouds-on-sky-gm184103864-16699674')";
-    } else if (description.includes("rain")) {
-      backgroundUrl = "url('https://www.istockphoto.com/photo/transparent-umbrella-under-rain-against-water-drops-splash-background-rainy-weather-gm1257951336-368822698')";
-    } else if (description.includes("snow")) {
-      backgroundUrl = "url('https://www.istockphoto.com/photo/skier-skis-down-slope-through-fresh-powder-snow-gm2165025120-585254961')";
-    } else {
-      backgroundUrl = "url('https://media.istockphoto.com/id/1365264688/vector/weather-forecast-meteorology-widget-app-interface.jpg?s=612x612&w=0&k=20&c=OSQHTnpLnK_p5jpyJ3i1hU7CWPSDUV_9JV69WqANgYk=')";
+  // fetch 5-day forecast, sample every 8th entry, and include rain
+  const fetchForecast = async (loc) => {
+    try {
+      const res = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${loc}&appid=${API_KEY}&units=metric`
+      );
+      const data = await res.json();
+      if (data.cod === "200") {
+        const slice = data.list.filter((_, i) => i % 8 === 0).slice(0, 5);
+        setForecastData(
+          slice.map((d) => ({
+            date: d.dt_txt.split(" ")[0],
+            temp: d.main.temp,
+            rain: (d.rain && d.rain["3h"]) || 0,
+          }))
+        );
+      } else {
+        setForecastData([]);
+      }
+    } catch {
+      setForecastData([]);
     }
-
-    setBackgroundImage(backgroundUrl);
   };
 
   const getWeather = async () => {
-    if (!city) {
-      alert("Please enter a city.");
-      return;
-    }
-
+    if (!city.trim()) return alert("Please enter a city.");
     try {
-      const response = await fetch(
+      const res = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch weather data.");
-      }
-      const data = await response.json();
+      if (!res.ok) throw new Error("Failed to fetch.");
+      const data = await res.json();
       setWeatherData(data);
       setBackground(data.weather[0].description);
-    } catch (error) {
-      alert(error.message);
+      await fetchForecast(city);
+      setShowTrend(true);
+    } catch (e) {
+      alert(e.message);
       setWeatherData(null);
+      setForecastData([]);
+      setShowTrend(false);
     }
+  };
+
+  // Chart.js config with two datasets
+  const trendChartData = {
+    labels: forecastData.map((d) => d.date),
+    datasets: [
+      {
+        label: "Temp (°C)",
+        data: forecastData.map((d) => d.temp),
+        borderColor: "#28a745",        // admin-success
+        backgroundColor: "rgba(40,167,69,0.2)",
+        yAxisID: "yTemp",
+      },
+      {
+        label: "Rain (mm)",
+        data: forecastData.map((d) => d.rain),
+        borderColor: "#ffc107",        // warning accent
+        backgroundColor: "rgba(255,193,7,0.2)",
+        yAxisID: "yRain",
+      },
+    ],
+  };
+
+  const trendChartOptions = {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    stacked: false,
+    scales: {
+      yTemp: {
+        type: "linear",
+        position: "left",
+        title: { display: true, text: "Temperature (°C)", color: "#28a745" },
+        grid: { drawOnChartArea: false },
+      },
+      yRain: {
+        type: "linear",
+        position: "right",
+        title: { display: true, text: "Rainfall (mm)", color: "#ffc107" },
+        grid: { drawOnChartArea: false },
+      },
+    },
   };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        backgroundImage: backgroundImage,
+        backgroundImage,
         backgroundSize: "cover",
         backgroundPosition: "center",
         padding: "2rem",
       }}
     >
-      <div className="container bg-light p-4 rounded shadow">
-        <h2 className="mb-4">Weather Dashboard</h2>
+      <div className="container bg-black text-success border border-success p-4 rounded shadow-lg">
+        <h2 className="mb-4 border-bottom border-success pb-2">
+          Weather Dashboard
+        </h2>
 
-        {/* Search Input */}
-        <div className="form-group mb-3">
-          <label htmlFor="city">Enter City</label>
+        {/* City Input */}
+        <div className="mb-3">
+          <label className="form-label text-success">City</label>
           <input
-            type="text"
-            className="form-control"
-            id="city"
+            className="form-control bg-dark text-success border-success"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="Enter city name"
-            required
+            placeholder="Enter city"
           />
         </div>
-
-        <button className="btn btn-primary" onClick={getWeather}>
+        <button className="btn btn-success" onClick={getWeather}>
           Get Weather
         </button>
 
-        {/* Weather Information */}
+        {/* Current Weather */}
         {weatherData && (
-          <div id="weatherInfo" className="mt-5">
-            <h3>
-              Weather in <span>{weatherData.name}</span>
+          <div className="mt-5 bg-dark p-4 rounded border border-success">
+            <h3 className="text-warning mb-3">
+              Weather in {weatherData.name}
             </h3>
             <p>
-              <strong>Temperature:</strong> {weatherData.main.temp} °C
+              <strong>Temperature:</strong> {weatherData.main.temp}°C
             </p>
             <p>
-              <strong>Feels Like:</strong> {weatherData.main.feels_like} °C
+              <strong>Feels Like:</strong> {weatherData.main.feels_like}°C
             </p>
             <p>
               <strong>Humidity:</strong> {weatherData.main.humidity}%
             </p>
             <p>
-              <strong>Wind Speed:</strong> {weatherData.wind.speed} m/s
+              <strong>Wind:</strong> {weatherData.wind.speed} m/s
             </p>
             <p>
-              <strong>Description:</strong> {weatherData.weather[0].description}
+              <strong>Description:</strong>{" "}
+              {weatherData.weather[0].description}
             </p>
             <p>
-              <strong>Sunrise:</strong> {convertToTime(weatherData.sys.sunrise + weatherData.timezone)}
+              <strong>Sunrise:</strong>{" "}
+              {convertToTime(weatherData.sys.sunrise + weatherData.timezone)}
             </p>
             <p>
-              <strong>Sunset:</strong> {convertToTime(weatherData.sys.sunset + weatherData.timezone)}
+              <strong>Sunset:</strong>{" "}
+              {convertToTime(weatherData.sys.sunset + weatherData.timezone)}
             </p>
+          </div>
+        )}
+
+        {/* Trend Toggle */}
+        {forecastData.length > 0 && (
+          <div className="mt-4">
+            <button
+              className="btn btn-warning"
+              onClick={() => setShowTrend((v) => !v)}
+              aria-expanded={showTrend}
+            >
+              {showTrend ? "Hide" : "Show"} 5-Day Trends
+            </button>
+            <div className={`collapse ${showTrend ? "show" : ""} mt-3`}>
+              <div className="bg-dark p-3 rounded border border-success">
+                <Line
+                  data={trendChartData}
+                  options={trendChartOptions}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>

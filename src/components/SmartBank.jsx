@@ -159,7 +159,7 @@ const SmartBank = () => {
                 <>
                   <h4 className="text-center text-success mb-3">Welcome, {username}</h4>
                   <div className="text-center mb-3">
-                    <h5 className="text-success">Balance: ${balance.toFixed(2)}</h5>
+                    <h5 className="text-success">Balance: Ksh {balance.toFixed(2)}</h5>
                   </div>
 
                   {/* Deposit */}
