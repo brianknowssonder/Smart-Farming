@@ -1,7 +1,7 @@
 // WeatherComponent.jsx
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Line } from "react-chartjs-2";
-import ChartJS from "chart.js/auto";
+
 
 export const WeatherComponent = () => {
   const API_KEY = "da332b532324f8d565bafa71121cbd87";
