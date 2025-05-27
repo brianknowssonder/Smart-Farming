@@ -29,7 +29,7 @@ const SignUp = () => {
             data.append('phone',phone);
             data.append('password',password);
 
-            const response = await axios.post("https://us3r7777.pythonanywhere.com/api/signup",data)
+            const response = await axios.post("https://brembo.pythonanywhere.com/api/signup",data)
             setLoading('');
             setSuccess(response.data.Message);
 
